@@ -60,7 +60,7 @@ define([
       this.ref_genome = args.browser.config.dataset_id;
       this.bin_size = args.bin_size || 100000;
       this.gcContent = args.gcContent ;
-      console.log("bin: ", this.bin_size, 'gc_file: ', this.gcContent);
+      // console.log("bin: ", this.bin_size, 'gc_file: ', this.gcContent);
       this.featureCache = new AbortablePromiseCache({
         cache: new LRU({
           maxSize: 20,
@@ -70,7 +70,7 @@ define([
     },
 
     async parseGC() {
-      const result = await fetch(this.resolveUrl(this.config.gcContent));
+      const result = await fetch(this.resolveUrl(this.gcContent));
       if (!result.ok) {
         throw new Error("no gc content specified");
       }
