@@ -37,6 +37,7 @@ define([
       this.prompt = args.prompt;
       this.goCallback = args.goCallback;
       this.showCallback = args.showCallback;
+      this.ref = args.browser.config.dataset_id;
     },
 
     show: function () {
@@ -88,31 +89,6 @@ define([
       this.actionBar = dojo.create("div", {
         className: "infoDialogActionBar dijitDialogPaneActionBar",
       });
-
-      // Reference genome set
-      const flex3 = dojo.create(
-        "div",
-        { style: { display: "flex", padding: "2px" } },
-        subcontainer
-      );
-      const panel3 = dojo.create("div", { style: { padding: "1px" } }, flex3);
-      dojo.create(
-        "span",
-        {
-          innerHTML: "Reference genome (used to calibrate GC):",
-          style: { margin: "0 5px 0 0" },
-        },
-        panel3
-      );
-
-      new Select({
-        name: "reference_name",
-        options: ["hg19", "hg38"].map((sample, index) => ({
-          label: sample,
-          value: sample,
-          selected: index === 0,
-        })),
-      }).placeAt(panel3);
 
       // Select sample
       const flex4 = dojo.create(
@@ -207,18 +183,24 @@ define([
 
       const flex6 = dojo.create(
         "div",
-        { style: { display: "flex", padding: "1px" } },
+        { style: { display: "flex", padding: "1px"} },
         subcontainer
       );
       const panel6 = dojo.create("div", { style: { padding: "1px" } }, flex6);
       dojo.create(
         "snan",
-        { innerHTML: "Bin Size", style: { margin: "0 5px 0 0" } },
+        { innerHTML: "Select Bin Size ", style: {margin: "0 5px 0 0"} },
         panel6
       );
-      var binSize = new TextBox({ value: 100000, width: "5em" }).placeAt(
-        panel6
-      );
+
+      var binSize = new Select({
+        name: "binSize",
+        options: ["100000"].map((bin, index) => ({
+          label: bin,
+          value: parseInt(bin),
+          selected: index === 0,
+        })),
+      }).placeAt(panel6);
 
       // Default Track name
       const flex7 = dojo.create(
@@ -249,10 +231,7 @@ define([
         label: "Submit",
         onClick: () => {
           const conf = this.browser.resolveUrl(
-            // this.browser.config.dataRoot + "/gc/" + "hg19.100000.gc",
-            this.browser.config.baseUrl +
-              "/plugins/CNVpytorVCF/test/data/gc/" +
-              "hg19.100000.gc"
+            this.browser.config.baseUrl + "plugins/CNVpytorVCF/test/"+ this.ref + "/gc/" + this.ref +".100000.gc",
           );
 
           // if they passed a URL, use the search box
@@ -260,6 +239,7 @@ define([
             var storeConf = {
               browser: this.browser,
               refSeq: this.browser.refSeq,
+              binSize: binSize.value,
               sample: +this.sampleIndex.value || 0,
               type: "CNVpytorVCF/Store/SeqFeature/RDSegmentation",
               gcContent: conf,

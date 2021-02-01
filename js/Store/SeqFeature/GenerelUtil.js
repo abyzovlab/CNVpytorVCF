@@ -3,12 +3,12 @@ import LM from "ml-levenberg-marquardt";
 export class GetFit {
   constructor(avgbin) {
     this.avgbin = avgbin;
+    this.global_chr = Array.from({length: 22}, (x, i) => "chr"+(i+1));
   }
   get_all_normal_rd() {
     let chr_score = [];
     for (const chr in this.avgbin) {
-      // chr_int = parseInt(chr);
-      if (parseInt(chr) < 23) {
+       if (this.global_chr.includes(chr)){
         for (let bin in this.avgbin[chr]) {
           chr_score.push(this.avgbin[chr][bin].bin_score);
           // chr_score.push(this.avgbin[chr][bin].gc_corrected);
@@ -20,8 +20,7 @@ export class GetFit {
   get_all_gc_rd() {
     let chr_score = [];
     for (const chr in this.avgbin) {
-      // chr_int = parseInt(chr);
-      if (parseInt(chr) < 23) {
+      if (this.global_chr.includes(chr)){
         for (let bin in this.avgbin[chr]) {
           chr_score.push(this.avgbin[chr][bin].gc_corrected);
         }

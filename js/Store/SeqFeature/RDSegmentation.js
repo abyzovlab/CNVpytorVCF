@@ -57,8 +57,10 @@ define([
   return declare(VCFTabix, {
     constructor(args) {
       this.sample = args.sample || 0;
-
+      this.ref_genome = args.browser.config.dataset_id;
       this.bin_size = args.bin_size || 100000;
+      this.gcContent = args.gcContent ;
+      console.log("bin: ", this.bin_size, 'gc_file: ', this.gcContent);
       this.featureCache = new AbortablePromiseCache({
         cache: new LRU({
           maxSize: 20,
@@ -131,8 +133,8 @@ define([
 
       var bins = [];
 
-      const refName = query.ref.replace("chr", "");
-      const chrGc = gc[refName];
+      // const refName = query.ref.replace("chr", "");
+      const chrGc = gc[regularizedReferenceName];
       // console.log('gc length', chrGc.length);
       await this.indexedData.getLines(
         regularizedReferenceName,
@@ -305,7 +307,8 @@ define([
         const score = +fields[9 + sample].split(":")[DP];
         scores.push(score);
 
-        let refName = fields[0].replace("chr", "");
+        // let refName = fields[0].replace("chr", "");
+        let refName = fields[0]
         const start = fields[1];
         //const sampleName = samples[sample];
         const featureBin = Math.max(Math.floor(start / binSize), 0);
@@ -321,7 +324,8 @@ define([
 
       //console.log(chrbin_score);
       var avgbin = [];
-      for (const chr in chrbin_score) {
+      for (let chr in chrbin_score) {
+
         if (!avgbin[chr]) {
           avgbin[chr] = [];
         }
@@ -353,23 +357,13 @@ define([
         }
       }
 
-      // console.log('Avg bin', avgbin);
-      // console.log(gcContent)
-
       // get curve_fit values
       var fit_info = new GetFit(avgbin);
       // var max_rd = fit_info.max_rd();
       var [fit, max_rd] = fit_info.fit_data();
-      // fit_data_gc_corrected
-      // var [fit, max_rd] = fit_info.fit_data_gc_corrected();
-      // console.log(fit);
-      // console.log(fit_info.fit_data());
-      // console.log(gcContent);
+
       for (const gc in gcContent) {
         var raw_gc = gcContent[gc].filter((x) => x > 0 && x < max_rd);
-        //console.log(gc, gcContent[gc]);
-        //console.log(raw_gc);
-        //const gcMean = getMean(gcContent[gc]);
         const gcMean = getMean(raw_gc);
         gcContent[gc] = gcMean / fit.mean;
         //console.log(gc, gcMean/64421.94430992736);
